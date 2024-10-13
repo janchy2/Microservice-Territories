@@ -9,7 +9,7 @@ def create_request(body):
         return generate_response(400, 'Invalid or incomplete territory data!')
     table = connect_to_database()
     levels = ['administrative_area_1', 'administrative_area_2', 'locality', 'postal_code']
-    path = 'RS' # no need for root element, it is Serbia for all
+    path = 'RS' # root is RS - we need it because of the secondary index
     for level in levels:
         element_id = check_if_element_exists(table, territory_data[level], level)
         if element_id and level == 'postal_code':
