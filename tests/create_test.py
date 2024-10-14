@@ -34,25 +34,25 @@ def test_create_whole_path_successful():
         assert put_item_calls[0][1]['Item'] == {
             'territory_name': 'Belgrade',
             'territory_type': 'administrative_area_1',
-            'path': 'RS',
+            'territory_path': 'RS',
             'uuid': '426614174000'
         }
         assert put_item_calls[1][1]['Item'] == {
             'territory_name': 'City of Belgrade',
             'territory_type': 'administrative_area_2',
-            'path': 'RS#426614174000',
+            'territory_path': 'RS#426614174000',
             'uuid': '426614174001'
         }
         assert put_item_calls[2][1]['Item'] == {
             'territory_name': 'Belgrade',
             'territory_type': 'locality',
-            'path': 'RS#426614174000#426614174001',
+            'territory_path': 'RS#426614174000#426614174001',
             'uuid': '426614174002'
         }
         assert put_item_calls[3][1]['Item'] == {
             'territory_name': '11000',
             'territory_type': 'postal_code',
-            'path': 'RS#426614174000#426614174001#426614174002',
+            'territory_path': 'RS#426614174000#426614174001#426614174002',
             'uuid': '426614174003'
         }
 
@@ -82,13 +82,13 @@ def test_create_partial_path_successful():
         assert put_item_calls[0][1]['Item'] == {
             'territory_name': 'Malča',
             'territory_type': 'locality',
-            'path': 'RS#426614174001#426614174002',
+            'territory_path': 'RS#426614174001#426614174002',
             'uuid': '426614174004'
         }
         assert put_item_calls[1][1]['Item'] == {
             'territory_name': '18206',
             'territory_type': 'postal_code',
-            'path': 'RS#426614174001#426614174002#426614174004',
+            'territory_path': 'RS#426614174001#426614174002#426614174004',
             'uuid': '426614174005'
         }
 
@@ -128,4 +128,3 @@ def test_invalid_data():
     body = json.loads(result['body'])
     assert body['message'] == 'Invalid or incomplete territory data!'
     assert result['statusCode'] == 400
-    

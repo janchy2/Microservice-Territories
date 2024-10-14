@@ -1,6 +1,5 @@
-import json
 import uuid
-import boto3
+from common_functions import generate_response, connect_to_database
 
 
 def create_request(body):
@@ -22,6 +21,7 @@ def create_request(body):
 
 
 def extract_data(body):
+    # body is the response from Google Geoencoder
     if 'results' in body and len(body['results']):
         result = body['results'][0]
         address_components = result.get('address_components', [])
@@ -40,12 +40,6 @@ def extract_data(body):
         if len(territory_data) == 5 and territory_data['country'] == 'Serbia':
             # all attributes present and territory belongs to Serbia
            return territory_data
-
-        
-def connect_to_database():
-    dynamodb = boto3.resource('dynamodb')
-    table_name = 'territories'
-    return dynamodb.Table(table_name)
 
 
 def check_if_element_exists(table, name, type):
@@ -67,7 +61,7 @@ def create_element(table, name, type, path):
         'uuid': uuid,
         'territory_name': name,
         'territory_type': type,
-        'path': path
+        'territory_path': path
     }
     table.put_item(Item=item_data)
     return uuid
@@ -78,11 +72,3 @@ def generate_uuid():
     generated_uuid = uuid.uuid4()
     uuid_str = str(generated_uuid)
     return uuid_str.split('-')[-1]
-
-
-def generate_response(status, message):
-    return {
-        'statusCode': status,
-        'body': json.dumps({'message': message}),
-        'headers': {'Content-Type': 'application/json'}
-    }
