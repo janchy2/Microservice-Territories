@@ -220,5 +220,18 @@ events = [
             ],
             "status": "OK"
         }
+    },
+    {
+        "httpMethod" : "PATCH",
+        "body" : {
+            "postal_code_uuid": "f236fb52ab06",
+            "new_territory_uuid": "65f51efbf5e7"
+        }
+    },
+    {
+        "httpMethod" : "PATCH",
+        "body" : {
+            "postal_code_uuid": "f236fb52ab06"
+        }
     }
 ]

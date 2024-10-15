@@ -5,17 +5,11 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from lambda_function import lambda_handler
+from example_requests import events
 
 
 def test_update_locality_successful():
-    event = {
-        "httpMethod" : "PATCH",
-        "body" : {
-            "postal_code_uuid": "f236fb52ab06",
-            "new_territory_uuid": "65f51efbf5e7"
-        }
-    }
-
+    event = events[4]
     with patch('boto3.resource') as mock_dynamo_resource:
         mock_table = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
@@ -47,14 +41,7 @@ def test_update_locality_successful():
 
 
 def test_update_admin_area_2_successful():
-    event = {
-        "httpMethod" : "PATCH",
-        "body" : {
-            "postal_code_uuid": "f236fb52ab06",
-            "new_territory_uuid": "65f51efbf5e7"
-        }
-    }
-
+    event = events[4]
     with patch('boto3.resource') as mock_dynamo_resource:
         mock_table = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
@@ -95,3 +82,89 @@ def test_update_admin_area_2_successful():
         assert update_item_calls[1][1]['Key'] == {'uuid': 'f236fb52ab06'}
         assert update_item_calls[1][1]['UpdateExpression'] == "set territory_path = :new_path"
         assert update_item_calls[1][1]['ExpressionAttributeValues'] == {':new_path': 'RS#426614174000#65f51efbf5e7#426614174004'}
+
+
+def test_incomplete_data():
+    event = events[5]
+    result = lambda_handler(event, None)
+    body = json.loads(result['body'])
+    assert body['message'] == 'Invalid or incomplete update data!'
+    assert result['statusCode'] == 400
+
+
+def test_non_existent_postal_code_uuid():
+    event = events[4]
+    with patch('boto3.resource') as mock_dynamo_resource:
+        mock_table = MagicMock()
+        mock_dynamo_resource.return_value.Table.return_value = mock_table
+        result = lambda_handler(event, None)
+        body = json.loads(result['body'])
+        assert body['message'] == 'Non-existent or invalid postal code uuid!'
+        assert result['statusCode'] == 400
+
+
+def test_non_existent_new_territory_uuid():
+    event = events[4]
+    with patch('boto3.resource') as mock_dynamo_resource:
+        mock_table = MagicMock()
+        mock_dynamo_resource.return_value.Table.return_value = mock_table
+        mock_table.get_item.side_effect = [
+            # returns postal code but not new territory
+            {'Item': {
+                'territory_name': '18206',
+                'territory_type': 'postal_code',
+                'territory_path': 'RS#426614174001#426614174002#426614174004',
+                'uuid': 'f236fb52ab06'
+            }},
+            {'Item': None}
+        ]
+        result = lambda_handler(event, None)
+        body = json.loads(result['body'])
+        assert body['message'] == 'Non-existent or invalid new territory uuid!'
+        assert result['statusCode'] == 400
+
+
+def test_invalid_postal_code():
+    event = events[4]
+    with patch('boto3.resource') as mock_dynamo_resource:
+        mock_table = MagicMock()
+        mock_dynamo_resource.return_value.Table.return_value = mock_table
+        mock_table.get_item.side_effect = [
+            # returns postal code but not new territory
+            {'Item': {
+                'territory_name': 'Novi Sad',
+                'territory_type': 'locality',
+                'territory_path': 'RS#426614174001#426614174002#426614174004',
+                'uuid': 'f236fb52ab06'
+            }}
+        ]
+        result = lambda_handler(event, None)
+        body = json.loads(result['body'])
+        assert body['message'] == 'Non-existent or invalid postal code uuid!'
+        assert result['statusCode'] == 400
+
+
+def test_invalid_new_territory():
+    event = events[4]
+    with patch('boto3.resource') as mock_dynamo_resource:
+        mock_table = MagicMock()
+        mock_dynamo_resource.return_value.Table.return_value = mock_table
+        mock_table.get_item.side_effect = [
+            # returns postal code and admin area 1 elements
+            {'Item': {
+                'territory_name': '18206',
+                'territory_type': 'postal_code',
+                'territory_path': 'RS#426614174001#426614174002#426614174004',
+                'uuid': 'f236fb52ab06'
+            }},
+            {'Item': {
+                'territory_name': 'Belgrade',
+                'territory_type': 'administrative_area_1',
+                'territory_path': 'RS#426614174000',
+                'uuid': '65f51efbf5e7'
+            }}
+        ]
+        result = lambda_handler(event, None)
+        body = json.loads(result['body'])
+        assert body['message'] == 'Non-existent or invalid new territory uuid!'
+        assert result['statusCode'] == 400
