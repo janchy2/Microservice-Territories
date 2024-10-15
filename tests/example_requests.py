@@ -233,5 +233,15 @@ events = [
         "body" : {
             "postal_code_uuid": "f236fb52ab06"
         }
+    },
+    {
+        "httpMethod" : "DELETE",
+        "pathParameters" : {
+            "uuid": "f236fb52ab08"
+        }
+    },
+    {
+        "httpMethod" : "DELETE",
+         "pathParameters" : {}
     }
 ]

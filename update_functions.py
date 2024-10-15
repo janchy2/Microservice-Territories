@@ -17,7 +17,7 @@ def update_request(body):
         change_locality_path(table, postal_code_elem, new_territory_elem)
     else:
         change_admin_area_2(table, postal_code_elem, new_territory_elem)
-    return generate_response(204, 'Territory updated successfully!')
+    return generate_response(200, 'Territory updated successfully!')
 
     
 def get_element(table, uuid):

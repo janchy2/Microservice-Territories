@@ -32,7 +32,7 @@ def test_update_locality_successful():
         result = lambda_handler(event, None)
         body = json.loads(result['body'])
         assert body['message'] == 'Territory updated successfully!'
-        assert result['statusCode'] == 204
+        assert result['statusCode'] == 200
 
         update_item_calls = mock_table.update_item.call_args_list
         assert update_item_calls[0][1]['Key'] == {'uuid': 'f236fb52ab06'}
@@ -72,7 +72,7 @@ def test_update_admin_area_2_successful():
         result = lambda_handler(event, None)
         body = json.loads(result['body'])
         assert body['message'] == 'Territory updated successfully!'
-        assert result['statusCode'] == 204
+        assert result['statusCode'] == 200
 
         update_item_calls = mock_table.update_item.call_args_list
         assert update_item_calls[0][1]['Key'] == {'uuid': '426614174004'}
