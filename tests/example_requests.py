@@ -243,5 +243,15 @@ events = [
     {
         "httpMethod" : "DELETE",
          "pathParameters" : {}
+    },
+    {   
+        "httpMethod" : "GET",
+        "pathParameters" : {
+            "uuid": "f236fb52ab02"
+        }
+    },
+    {   
+        "httpMethod" : "GET",
+        "pathParameters" : {}
     }
 ]

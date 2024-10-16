@@ -79,11 +79,9 @@ def test_non_existent_uuid():
         mock_table = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.get_item.side_effect = [
-            # no children
             {'Item': {}}
         ]
-    
         result = lambda_handler(event, None)
         body = json.loads(result['body'])
         assert body['message'] == 'Non-existent uuid!'
-        assert result['statusCode'] == 409
+        assert result['statusCode'] == 404

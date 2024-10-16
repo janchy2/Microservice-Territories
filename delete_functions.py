@@ -1,4 +1,3 @@
-import boto3
 from boto3.dynamodb.conditions import Attr
 from common_functions import generate_response, connect_to_database
 
@@ -9,7 +8,7 @@ def delete_request(parameters):
     table = connect_to_database()
     element = get_element(table, parameters['uuid'])
     if not element:
-        return generate_response(409, 'Non-existent uuid!')
+        return generate_response(404, 'Non-existent uuid!')
     if has_children(table, element):
         return generate_response(409, 'Territory has subterritories, it cannot be deleted!')
     delete_element(table, element)
@@ -26,7 +25,7 @@ def get_element(table, uuid):
 
 def has_children(table, element):
     response = table.scan(
-        FilterExpression=Attr('territory_path').begins_with(element['territory_path'] + '#')
+        FilterExpression=Attr('territory_path').begins_with(element['territory_path'] + '#' + element['uuid'] + '#')
     )
     return response.get('Items', [])
 

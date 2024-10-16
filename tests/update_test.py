@@ -97,10 +97,13 @@ def test_non_existent_postal_code_uuid():
     with patch('boto3.resource') as mock_dynamo_resource:
         mock_table = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
+        mock_table.get_item.side_effect = [
+            {'Item': {}}
+        ]
         result = lambda_handler(event, None)
         body = json.loads(result['body'])
         assert body['message'] == 'Non-existent or invalid postal code uuid!'
-        assert result['statusCode'] == 400
+        assert result['statusCode'] == 404
 
 
 def test_non_existent_new_territory_uuid():
@@ -116,12 +119,12 @@ def test_non_existent_new_territory_uuid():
                 'territory_path': 'RS#426614174001#426614174002#426614174004',
                 'uuid': 'f236fb52ab06'
             }},
-            {'Item': None}
+            {}
         ]
         result = lambda_handler(event, None)
         body = json.loads(result['body'])
         assert body['message'] == 'Non-existent or invalid new territory uuid!'
-        assert result['statusCode'] == 400
+        assert result['statusCode'] == 404
 
 
 def test_invalid_postal_code():
@@ -141,7 +144,7 @@ def test_invalid_postal_code():
         result = lambda_handler(event, None)
         body = json.loads(result['body'])
         assert body['message'] == 'Non-existent or invalid postal code uuid!'
-        assert result['statusCode'] == 400
+        assert result['statusCode'] == 404
 
 
 def test_invalid_new_territory():
@@ -167,4 +170,4 @@ def test_invalid_new_territory():
         result = lambda_handler(event, None)
         body = json.loads(result['body'])
         assert body['message'] == 'Non-existent or invalid new territory uuid!'
-        assert result['statusCode'] == 400
+        assert result['statusCode'] == 404

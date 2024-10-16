@@ -8,10 +8,10 @@ def update_request(body):
     table = connect_to_database()
     postal_code_elem = get_element(table, body['postal_code_uuid'])
     if not postal_code_elem or postal_code_elem['territory_type'] != 'postal_code':
-        return generate_response(400, 'Non-existent or invalid postal code uuid!')
+        return generate_response(404, 'Non-existent or invalid postal code uuid!')
     new_territory_elem = get_element(table, body['new_territory_uuid'])
     if not new_territory_elem or (new_territory_elem['territory_type'] != 'locality' and new_territory_elem['territory_type'] != 'administrative_area_2'):
-        return generate_response(400, 'Non-existent or invalid new territory uuid!')
+        return generate_response(404, 'Non-existent or invalid new territory uuid!')
     
     if new_territory_elem['territory_type'] == 'locality':
         change_locality_path(table, postal_code_elem, new_territory_elem)
