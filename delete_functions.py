@@ -3,8 +3,6 @@ from common_functions import generate_response, connect_to_database
 
 
 def delete_request(parameters):
-    if 'uuid' not in parameters:
-        return generate_response(400, 'Invalid or incomplete delete data!')
     table = connect_to_database()
     element = get_element(table, parameters['uuid'])
     if not element:

@@ -1,5 +1,5 @@
 import boto3
-import json
+from fastapi.responses import JSONResponse
 
 def connect_to_database():
     dynamodb = boto3.resource('dynamodb')
@@ -8,8 +8,4 @@ def connect_to_database():
 
 
 def generate_response(status, message):
-    return {
-        'statusCode': status,
-        'body': json.dumps({'message': message}),
-        'headers': {'Content-Type': 'application/json'}
-    }
+    return JSONResponse(status_code=status, content={'message': message})

@@ -1,6 +1,5 @@
 events = [
     {
-        "httpMethod": "POST",
         "body": {
             "results": [
                 {
@@ -62,7 +61,6 @@ events = [
         }
     },
     {
-        "httpMethod": "POST",
         "body": {
             "results" : [
                 {
@@ -119,7 +117,6 @@ events = [
         }
     },
     {
-        "httpMethod": "POST",
         "body": {
             "results" : [
                 {
@@ -170,7 +167,6 @@ events = [
         }
     },
     {
-        "httpMethod": "POST",
         "body": {
             "results": [
                 {
@@ -222,36 +218,14 @@ events = [
         }
     },
     {
-        "httpMethod" : "PATCH",
         "body" : {
             "postal_code_uuid": "f236fb52ab06",
             "new_territory_uuid": "65f51efbf5e7"
         }
     },
     {
-        "httpMethod" : "PATCH",
         "body" : {
             "postal_code_uuid": "f236fb52ab06"
         }
-    },
-    {
-        "httpMethod" : "DELETE",
-        "pathParameters" : {
-            "uuid": "f236fb52ab08"
-        }
-    },
-    {
-        "httpMethod" : "DELETE",
-         "pathParameters" : {}
-    },
-    {   
-        "httpMethod" : "GET",
-        "pathParameters" : {
-            "uuid": "f236fb52ab02"
-        }
-    },
-    {   
-        "httpMethod" : "GET",
-        "pathParameters" : {}
     }
 ]

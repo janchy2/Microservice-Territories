@@ -1,11 +1,15 @@
-import json
 from unittest.mock import patch, MagicMock
 import sys
 import os
 
+from fastapi.testclient import TestClient
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from lambda_function import lambda_handler
+from app import app
 from example_requests import events
+
+
+client = TestClient(app)
 
 
 def test_update_locality_successful():
@@ -29,10 +33,10 @@ def test_update_locality_successful():
             }}
         ]
     
-        result = lambda_handler(event, None)
-        body = json.loads(result['body'])
+        response = client.patch("/territories", json=event['body'])
+        body = response.json()
         assert body['message'] == 'Territory updated successfully!'
-        assert result['statusCode'] == 200
+        assert response.status_code == 200
 
         update_item_calls = mock_table.update_item.call_args_list
         assert update_item_calls[0][1]['Key'] == {'uuid': 'f236fb52ab06'}
@@ -69,10 +73,10 @@ def test_update_admin_area_2_successful():
             None
         ]
     
-        result = lambda_handler(event, None)
-        body = json.loads(result['body'])
+        response = client.patch("/territories", json=event['body'])
+        body = response.json()
         assert body['message'] == 'Territory updated successfully!'
-        assert result['statusCode'] == 200
+        assert response.status_code == 200
 
         update_item_calls = mock_table.update_item.call_args_list
         assert update_item_calls[0][1]['Key'] == {'uuid': '426614174004'}
@@ -86,10 +90,10 @@ def test_update_admin_area_2_successful():
 
 def test_incomplete_data():
     event = events[5]
-    result = lambda_handler(event, None)
-    body = json.loads(result['body'])
+    response = client.patch("/territories", json=event['body'])
+    body = response.json()
     assert body['message'] == 'Invalid or incomplete update data!'
-    assert result['statusCode'] == 400
+    assert response.status_code == 400
 
 
 def test_non_existent_postal_code_uuid():
@@ -100,10 +104,10 @@ def test_non_existent_postal_code_uuid():
         mock_table.get_item.side_effect = [
             {'Item': {}}
         ]
-        result = lambda_handler(event, None)
-        body = json.loads(result['body'])
+        response = client.patch("/territories", json=event['body'])
+        body = response.json()
         assert body['message'] == 'Non-existent or invalid postal code uuid!'
-        assert result['statusCode'] == 404
+        assert response.status_code == 404
 
 
 def test_non_existent_new_territory_uuid():
@@ -121,10 +125,10 @@ def test_non_existent_new_territory_uuid():
             }},
             {}
         ]
-        result = lambda_handler(event, None)
-        body = json.loads(result['body'])
+        response = client.patch("/territories", json=event['body'])
+        body = response.json()
         assert body['message'] == 'Non-existent or invalid new territory uuid!'
-        assert result['statusCode'] == 404
+        assert response.status_code == 404
 
 
 def test_invalid_postal_code():
@@ -141,10 +145,10 @@ def test_invalid_postal_code():
                 'uuid': 'f236fb52ab06'
             }}
         ]
-        result = lambda_handler(event, None)
-        body = json.loads(result['body'])
+        response = client.patch("/territories", json=event['body'])
+        body = response.json()
         assert body['message'] == 'Non-existent or invalid postal code uuid!'
-        assert result['statusCode'] == 404
+        assert response.status_code == 404
 
 
 def test_invalid_new_territory():
@@ -167,7 +171,7 @@ def test_invalid_new_territory():
                 'uuid': '65f51efbf5e7'
             }}
         ]
-        result = lambda_handler(event, None)
-        body = json.loads(result['body'])
+        response = client.patch("/territories", json=event['body'])
+        body = response.json()
         assert body['message'] == 'Non-existent or invalid new territory uuid!'
-        assert result['statusCode'] == 404
+        assert response.status_code == 404

@@ -1,11 +1,14 @@
-import json
 from unittest.mock import patch, MagicMock
 import sys
 import os
+from fastapi.testclient import TestClient
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from lambda_function import lambda_handler
+from app import app
 from example_requests import events
+
+
+client = TestClient(app)
 
 
 def test_create_whole_path_successful():
@@ -23,10 +26,10 @@ def test_create_whole_path_successful():
             {'Items': []},
         ]
     
-        result = lambda_handler(event, None)
-        body = json.loads(result['body'])
+        response = client.post("/territories", json=event['body'])
+        body = response.json()
         assert body['message'] == 'Territory created successfully!'
-        assert result['statusCode'] == 201
+        assert response.status_code == 201
 
         put_item_calls = mock_table.put_item.call_args_list
         assert len(put_item_calls) == 4
@@ -71,10 +74,10 @@ def test_create_partial_path_successful():
             {'Items': []},
         ]
     
-        result = lambda_handler(event, None)
-        body = json.loads(result['body'])
+        response = client.post("/territories", json=event['body'])
+        body = response.json()
         assert body['message'] == 'Territory created successfully!'
-        assert result['statusCode'] == 201
+        assert response.status_code == 201
 
         put_item_calls = mock_table.put_item.call_args_list
         assert len(put_item_calls) == 2
@@ -106,25 +109,25 @@ def test_postal_code_exists():
             {'Items': [{'uuid' : '426614174004'}]},
         ]
     
-        result = lambda_handler(event, None)
-        body = json.loads(result['body'])
+        response = client.post("/territories", json=event['body'])
+        body = response.json()
         assert body['message'] == 'Postal code already exists!'
-        assert result['statusCode'] == 409
+        assert response.status_code == 409
 
 
 def test_incomplete_data():
     event = events[2]
     # missing postal_code
-    result = lambda_handler(event, None)
-    body = json.loads(result['body'])
+    response = client.post("/territories", json=event['body'])
+    body = response.json()
     assert body['message'] == 'Invalid or incomplete territory data!'
-    assert result['statusCode'] == 400
+    assert response.status_code == 400
 
 
 def test_invalid_data():
     event = events[3]
     # not in Serbia
-    result = lambda_handler(event, None)
-    body = json.loads(result['body'])
+    response = client.post("/territories", json=event['body'])
+    body = response.json()
     assert body['message'] == 'Invalid or incomplete territory data!'
-    assert result['statusCode'] == 400
+    assert response.status_code == 400
