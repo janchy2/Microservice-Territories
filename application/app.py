@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Path, Body
-from create_functions import create_request
-from update_functions import update_request
-from delete_functions import delete_request
-from retrieve_functions import retrieve_request
-from common_functions import generate_response
+from application.create_functions import create_request
+from application.update_functions import update_request
+from application.delete_functions import delete_request
+from application.retrieve_functions import retrieve_request
+from application.common_functions import generate_response
 
 app = FastAPI()
 
@@ -16,7 +16,7 @@ def create_resource(body: dict = Body(...)):
 @app.patch("/territories")
 def update_resource(body: dict = Body(...)):
     return update_request(body)
-    
+
 
 @app.delete("/territories/{uuid}")
 def delete_resource(uuid: str = Path(...)):
@@ -30,4 +30,4 @@ def retrieve_resource(uuid: str = Path(...)):
 
 @app.get("/")
 def read_root():
-    return generate_response(400, 'Method not supported!')
+    return generate_response(400, "Method not supported!")
