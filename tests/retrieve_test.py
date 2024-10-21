@@ -2,17 +2,17 @@ from unittest.mock import patch, MagicMock
 import sys
 import os
 from fastapi.testclient import TestClient
+from typing import Dict, Any
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from application.app import app
 
+client: TestClient = TestClient(app)
 
-client = TestClient(app)
 
-
-def test_retrieve_successful():
+def test_retrieve_successful() -> None:
     with patch("boto3.resource") as mock_dynamo_resource:
-        mock_table = MagicMock()
+        mock_table: MagicMock = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.get_item.side_effect = [
             {
@@ -25,7 +25,6 @@ def test_retrieve_successful():
             }
         ]
         mock_table.scan.side_effect = [
-            # returns children
             {
                 "Items": [
                     {
@@ -39,7 +38,7 @@ def test_retrieve_successful():
         ]
 
         response = client.get("/territories/f236fb52ab02")
-        body = response.json()
+        body: Dict[str, Any] = response.json()
         assert body["territories"] == [
             {
                 "territory_name": "Belgrade",
@@ -57,12 +56,12 @@ def test_retrieve_successful():
         assert response.status_code == 200
 
 
-def test_non_existent_uuid():
+def test_non_existent_uuid() -> None:
     with patch("boto3.resource") as mock_dynamo_resource:
-        mock_table = MagicMock()
+        mock_table: MagicMock = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.get_item.side_effect = [{"Item": {}}]
         response = client.get("/territories/f236fb52ab02")
-        body = response.json()
+        body: Dict[str, Any] = response.json()
         assert body["message"] == "Non-existent uuid!"
         assert response.status_code == 404

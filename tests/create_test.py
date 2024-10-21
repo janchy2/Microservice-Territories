@@ -2,32 +2,32 @@ from unittest.mock import patch, MagicMock
 import sys
 import os
 from fastapi.testclient import TestClient
+from typing import Dict, Any
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from application.app import app
 from example_requests import events
 
+client: TestClient = TestClient(app)
 
-client = TestClient(app)
 
+def test_create_whole_path_successful() -> None:
+    event: Dict[str, Any] = events[0]
 
-def test_create_whole_path_successful():
-    event = events[0]
-
-    mock_uuids = [
+    mock_uuids: list[str] = [
         "123e4567-e89b-12d3-a456-426614174000",
         "223e4567-e89b-12d3-a456-426614174001",
         "323e4567-e89b-12d3-a456-426614174002",
         "423e4567-e89b-12d3-a456-426614174003",
     ]
+
     with patch("boto3.resource") as mock_dynamo_resource, patch(
         "uuid.uuid4", side_effect=mock_uuids
     ):
-        mock_table = MagicMock()
+        mock_table: MagicMock = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.scan.side_effect = [
-            # none of the territories exist
-            {"Items": []},
+            {"Items": []},  # none of the territories exist
             {"Items": []},
             {"Items": []},
             {"Items": []},
@@ -67,20 +67,21 @@ def test_create_whole_path_successful():
         }
 
 
-def test_create_partial_path_successful():
-    event = events[1]
-    mock_uuids = [
+def test_create_partial_path_successful() -> None:
+    event: Dict[str, Any] = events[1]
+    mock_uuids: list[str] = [
         "123e4567-e89b-12d3-a456-426614174004",
         "223e4567-e89b-12d3-a456-426614174005",
     ]
     with patch("boto3.resource") as mock_dynamo_resource, patch(
         "uuid.uuid4", side_effect=mock_uuids
     ):
-        mock_table = MagicMock()
+        mock_table: MagicMock = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.scan.side_effect = [
-            # admin area 2 and admin area 1 exist
-            {"Items": [{"uuid": "426614174001"}]},
+            {
+                "Items": [{"uuid": "426614174001"}]
+            },  # admin area 2 and admin area 1 exist
             {"Items": [{"uuid": "426614174002"}]},
             {"Items": []},
             {"Items": []},
@@ -108,14 +109,13 @@ def test_create_partial_path_successful():
         }
 
 
-def test_postal_code_exists():
-    event = events[0]
+def test_postal_code_exists() -> None:
+    event: Dict[str, Any] = events[0]
     with patch("boto3.resource") as mock_dynamo_resource:
-        mock_table = MagicMock()
+        mock_table: MagicMock = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.scan.side_effect = [
-            # all territories exist
-            {"Items": [{"uuid": "426614174001"}]},
+            {"Items": [{"uuid": "426614174001"}]},  # all territories exist
             {"Items": [{"uuid": "426614174002"}]},
             {"Items": [{"uuid": "426614174003"}]},
             {"Items": [{"uuid": "426614174004"}]},
@@ -127,18 +127,16 @@ def test_postal_code_exists():
         assert response.status_code == 409
 
 
-def test_incomplete_data():
-    event = events[2]
-    # missing postal_code
+def test_incomplete_data() -> None:
+    event: Dict[str, Any] = events[2]
     response = client.post("/territories", json=event["body"])
     body = response.json()
     assert body["message"] == "Invalid or incomplete territory data!"
     assert response.status_code == 400
 
 
-def test_invalid_data():
-    event = events[3]
-    # not in Serbia
+def test_invalid_data() -> None:
+    event: Dict[str, Any] = events[3]
     response = client.post("/territories", json=event["body"])
     body = response.json()
     assert body["message"] == "Invalid or incomplete territory data!"

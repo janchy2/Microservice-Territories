@@ -1,24 +1,22 @@
 from unittest.mock import patch, MagicMock
 import sys
 import os
-
 from fastapi.testclient import TestClient
+from typing import Dict, Any
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from application.app import app
 from example_requests import events
 
+client: TestClient = TestClient(app)
 
-client = TestClient(app)
 
-
-def test_update_locality_successful():
-    event = events[4]
+def test_update_locality_successful() -> None:
+    event: Dict[str, Any] = events[4]
     with patch("boto3.resource") as mock_dynamo_resource:
-        mock_table = MagicMock()
+        mock_table: MagicMock = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.get_item.side_effect = [
-            # returns postal code and locality elements
             {
                 "Item": {
                     "territory_name": "18206",
@@ -38,7 +36,7 @@ def test_update_locality_successful():
         ]
 
         response = client.patch("/territories", json=event["body"])
-        body = response.json()
+        body: Dict[str, Any] = response.json()
         assert body["message"] == "Territory updated successfully!"
         assert response.status_code == 200
 
@@ -53,13 +51,12 @@ def test_update_locality_successful():
         }
 
 
-def test_update_admin_area_2_successful():
-    event = events[4]
+def test_update_admin_area_2_successful() -> None:
+    event: Dict[str, Any] = events[4]
     with patch("boto3.resource") as mock_dynamo_resource:
-        mock_table = MagicMock()
+        mock_table: MagicMock = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.get_item.side_effect = [
-            # returns postal code and admin area 2 elements
             {
                 "Item": {
                     "territory_name": "18206",
@@ -89,7 +86,7 @@ def test_update_admin_area_2_successful():
         ]
 
         response = client.patch("/territories", json=event["body"])
-        body = response.json()
+        body: Dict[str, Any] = response.json()
         assert body["message"] == "Territory updated successfully!"
         assert response.status_code == 200
 
@@ -113,33 +110,32 @@ def test_update_admin_area_2_successful():
         }
 
 
-def test_incomplete_data():
-    event = events[5]
+def test_incomplete_data() -> None:
+    event: Dict[str, Any] = events[5]
     response = client.patch("/territories", json=event["body"])
-    body = response.json()
+    body: Dict[str, Any] = response.json()
     assert body["message"] == "Invalid or incomplete update data!"
     assert response.status_code == 400
 
 
-def test_non_existent_postal_code_uuid():
-    event = events[4]
+def test_non_existent_postal_code_uuid() -> None:
+    event: Dict[str, Any] = events[4]
     with patch("boto3.resource") as mock_dynamo_resource:
-        mock_table = MagicMock()
+        mock_table: MagicMock = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.get_item.side_effect = [{"Item": {}}]
         response = client.patch("/territories", json=event["body"])
-        body = response.json()
+        body: Dict[str, Any] = response.json()
         assert body["message"] == "Non-existent or invalid postal code uuid!"
         assert response.status_code == 404
 
 
-def test_non_existent_new_territory_uuid():
-    event = events[4]
+def test_non_existent_new_territory_uuid() -> None:
+    event: Dict[str, Any] = events[4]
     with patch("boto3.resource") as mock_dynamo_resource:
-        mock_table = MagicMock()
+        mock_table: MagicMock = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.get_item.side_effect = [
-            # returns postal code but not new territory
             {
                 "Item": {
                     "territory_name": "18206",
@@ -151,18 +147,17 @@ def test_non_existent_new_territory_uuid():
             {},
         ]
         response = client.patch("/territories", json=event["body"])
-        body = response.json()
+        body: Dict[str, Any] = response.json()
         assert body["message"] == "Non-existent or invalid new territory uuid!"
         assert response.status_code == 404
 
 
-def test_invalid_postal_code():
-    event = events[4]
+def test_invalid_postal_code() -> None:
+    event: Dict[str, Any] = events[4]
     with patch("boto3.resource") as mock_dynamo_resource:
-        mock_table = MagicMock()
+        mock_table: MagicMock = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.get_item.side_effect = [
-            # returns postal code but not new territory
             {
                 "Item": {
                     "territory_name": "Novi Sad",
@@ -173,18 +168,17 @@ def test_invalid_postal_code():
             }
         ]
         response = client.patch("/territories", json=event["body"])
-        body = response.json()
+        body: Dict[str, Any] = response.json()
         assert body["message"] == "Non-existent or invalid postal code uuid!"
         assert response.status_code == 404
 
 
-def test_invalid_new_territory():
-    event = events[4]
+def test_invalid_new_territory() -> None:
+    event: Dict[str, Any] = events[4]
     with patch("boto3.resource") as mock_dynamo_resource:
-        mock_table = MagicMock()
+        mock_table: MagicMock = MagicMock()
         mock_dynamo_resource.return_value.Table.return_value = mock_table
         mock_table.get_item.side_effect = [
-            # returns postal code and admin area 1 elements
             {
                 "Item": {
                     "territory_name": "18206",
@@ -203,6 +197,6 @@ def test_invalid_new_territory():
             },
         ]
         response = client.patch("/territories", json=event["body"])
-        body = response.json()
+        body: Dict[str, Any] = response.json()
         assert body["message"] == "Non-existent or invalid new territory uuid!"
         assert response.status_code == 404

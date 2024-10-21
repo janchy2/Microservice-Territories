@@ -1,4 +1,6 @@
-events = [
+from typing import List, Dict, Any
+
+events: List[Dict[str, Any]] = [
     {
         "body": {
             "results": [
