@@ -7,8 +7,9 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DYNAMODB_ENDPOINT=http://dynamodb:8001
-      - AWS_DEFAULT_REGION=eu-south-1
+      - DYNAMODB_ENDPOINT=http://dynamodb:8000
+      - AWS_ACCESS_KEY_ID=RANDOM
+      - AWS_SECRET_ACCESS_KEY=RANDOM
     depends_on:
       - dynamodb
 
